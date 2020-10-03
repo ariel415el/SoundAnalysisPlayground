@@ -12,7 +12,7 @@ FRAME_STRIDE = 0.015
 PRE_EMPHASIS = 0.97
 NFFT = 512
 NUM_MEL_FILTES=40
-SINGAL_TIME = 10
+SINGAL_TIME = None # in seconds None for whole signal
 
 
 def hz2mel(freq):
@@ -128,8 +128,13 @@ def create_multi_signal(amplitudes, frequencies, phases, time=SINGAL_TIME, sampl
 
 def load_signal_from_file(sound_file):
 	sample_rate, signal = scipy.io.wavfile.read(sound_file)  # File assumed to be in the same directory
-	signal = signal[0:int(SINGAL_TIME * sample_rate)]  # Keep the first 3.5 seconds
-	xs = np.arange(0, SINGAL_TIME, 1 / sample_rate)
+	if len(signal.shape) > 1 and signal.shape[1] > 1:
+		print("Using only first signal out of more")
+		signal = signal[:, 0] # use only one signal if there are more than one
+	print("Sginal shape: ",signal.shape)
+	signal_duration = SINGAL_TIME if SINGAL_TIME is not None else len(signal) // sample_rate
+	signal = signal[0:int(signal_duration * sample_rate)]  # Keep the first SINGAL_TIME seconds
+	xs = np.arange(0, signal_duration, 1 / sample_rate)
 
 	return xs, signal, sample_rate
 
@@ -167,7 +172,6 @@ def plot_signal_spectogram(sound_file):
 	"""
 	signal_xs, signal_ys, sample_rate = load_signal_from_file(sound_file)
 
-
 	signal_ys_emph = pre_emphasize(signal_ys)
 
 	# Plot signal
@@ -196,5 +200,6 @@ def plot_signal_spectogram(sound_file):
 	plot_filters_reaction(filter_outputs, hz_bin_centers)
 
 if __name__ == '__main__':
-	analyze_synthetic_signals()
-	plot_signal_spectogram('OSR_us_000_0010_8k.wav')
+	# analyze_synthetic_signals()
+	# plot_signal_spectogram('OSR_us_000_0010_8k.wav')
+	plot_signal_spectogram('2B-T001_16.WAV')
