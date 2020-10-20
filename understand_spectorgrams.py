@@ -5,6 +5,8 @@ import numpy as np
 import scipy.io.wavfile
 import matplotlib.pyplot as plt
 from math import ceil
+import os
+
 COLORS=plt.get_cmap("jet")
 
 FRAME_SIZE = 0.03
@@ -12,9 +14,10 @@ FRAME_STRIDE = 0.015
 PRE_EMPHASIS = 0.97
 NFFT = 512
 NUM_MEL_FILTES=40
-SINGAL_TIME = None # in seconds None for whole signal
+SINGAL_TIME = 3.5 # in seconds None for whole signal
 
-
+OUTPUT_DIR = "outputs"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 def hz2mel(freq):
 	return (2595 * np.log10(1 + freq / 700))
 
@@ -23,30 +26,31 @@ def mel2hz(mel):
 	return (700 * (10 ** (mel / 2595) - 1))
 
 
-def plot_filters(filters):
+def plot_filters(filters, plot_path):
 	fig = plt.figure(figsize=(20,2))
 	for i,filter in enumerate(filters):
 		actual_indices = np.where(filter != 0)[0]
 		actual_indices = np.concatenate(([actual_indices.min() - 1], actual_indices, [actual_indices.max() + 1]))
 		plt.plot(actual_indices, filter[actual_indices], color=COLORS(i /len(filters)))
 	plt.legend(ncol=int(len(filters)/4), loc='lower center', bbox_to_anchor=(1.2,0.5))
-	plt.show()
+	plt.savefig(os.path.join(OUTPUT_DIR,plot_path))
+	plt.clf()
 
-
-def plot_signals(xs, signals, names):
+def plot_signals(xs, signals, names, plot_path):
 	fig = plt.figure(figsize=(20,2))
 	for i, (x, signal,name) in enumerate(zip(xs, signals, names)):
 		ax = plt.subplot(len(signals), 1, i+1)
 		ax.plot(x, signal, label=name, color=COLORS(i /len(signals)))
 		ax.legend(ncol=int(len(signals)/4))
-	plt.show()
+	plt.savefig(os.path.join(OUTPUT_DIR,plot_path))
+	plt.clf()
 
 
-def plot_filters_reaction(filters_output, hz_bin_centers):
+def plot_filters_reaction(filters_output, hz_bin_centers, plot_path):
 	"""
-
 	:param filters_output: num_frames x num_filters nd_matrix
 	"""
+	fig = plt.figure(figsize=(10,2))
 	filters_output = filters_output.T
 	plt.imshow(filters_output, cmap=plt.cm.jet)
 
@@ -56,7 +60,8 @@ def plot_filters_reaction(filters_output, hz_bin_centers):
 	plt.ylabel("Hz")
 	plt.gca().invert_yaxis()
 
-	plt.show()
+	plt.savefig(os.path.join(OUTPUT_DIR,plot_path))
+	plt.clf()
 
 
 def split_to_frames(signal, frame_length, overlap_length):
@@ -163,7 +168,7 @@ def analyze_synthetic_signals():
 	num_frequencies = ceil(len(signal_ys)/2)
 	frequencies = np.linspace(0, maximal_frequency, num_frequencies)
 	ft = ft[:num_frequencies]
-	plot_signals([signal_xs, frequencies], [signal_ys, ft], [signal_name, "ft"])
+	plot_signals([signal_xs, frequencies], [signal_ys, ft], [signal_name, "ft"], "synthetic_wave-form.png")
 
 
 def plot_signal_spectogram(sound_file):
@@ -175,7 +180,7 @@ def plot_signal_spectogram(sound_file):
 	signal_ys_emph = pre_emphasize(signal_ys)
 
 	# Plot signal
-	plot_signals([signal_xs, signal_xs], [signal_ys, signal_ys_emph], ["origninal signal", "emphasised signal"])
+	plot_signals([signal_xs, signal_xs], [signal_ys, signal_ys_emph], ["origninal signal", "emphasised signal"], "original_+emph_waveform.png")
 
 	frames = split_to_frames(signal_ys_emph, int(FRAME_SIZE * sample_rate), int(FRAME_STRIDE * sample_rate))
 	frames *= np.hamming(int(FRAME_SIZE * sample_rate))
@@ -185,21 +190,21 @@ def plot_signal_spectogram(sound_file):
 	# plot concatenated frames (with repetition)
 	plot_signals([range(len(frames.reshape(-1))), range(len(mag_frames.reshape(-1))), range(len(mag_frames.reshape(-1)))],
 					 [frames.reshape(-1), mag_frames.reshape(-1), pow_frames.reshape(-1)],
-					 ["concatenated frames)", "concatenated mag_frames", "concatenated power_frames"])
+					 ["concatenated frames)", "concatenated mag_frames", "concatenated power_frames"],"org_mag_pos_concatenated_frames.png")
 
 
 	mel_filter_bank, hz_bin_centers = get_mel_filter_bank(sample_rate, num_filters=NUM_MEL_FILTES, nfft=NFFT)
 
 	# Plot Mel filters
-	plot_filters(mel_filter_bank)
+	plot_filters(mel_filter_bank, "Mel-filters.png")
 
 	filter_outputs = np.dot(pow_frames, mel_filter_bank.T)
 	filter_outputs = np.where(filter_outputs == 0, np.finfo(float).eps, filter_outputs)  # Numerical Stability
 	filter_outputs = 20 * np.log10(filter_outputs)  # dB
 
-	plot_filters_reaction(filter_outputs, hz_bin_centers)
+	plot_filters_reaction(filter_outputs, hz_bin_centers, "Spectogram.png")
 
 if __name__ == '__main__':
 	# analyze_synthetic_signals()
 	# plot_signal_spectogram('OSR_us_000_0010_8k.wav')
-	plot_signal_spectogram('2B-T001_16.WAV')
+	plot_signal_spectogram('sound_snippets/OSR_us_000_0010_8k.wav')
