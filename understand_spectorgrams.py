@@ -18,6 +18,8 @@ SINGAL_TIME = 3.5 # in seconds None for whole signal
 
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+
 def hz2mel(freq):
 	return (2595 * np.log10(1 + freq / 700))
 
@@ -35,6 +37,7 @@ def plot_filters(filters, plot_path):
 	plt.legend(ncol=int(len(filters)/4), loc='lower center', bbox_to_anchor=(1.2,0.5))
 	plt.savefig(os.path.join(OUTPUT_DIR,plot_path))
 	plt.clf()
+
 
 def plot_signals(xs, signals, names, plot_path):
 	fig = plt.figure(figsize=(20,2))
@@ -67,6 +70,7 @@ def plot_filters_reaction(filters_output, hz_bin_centers, plot_path):
 def split_to_frames(signal, frame_length, overlap_length):
 	"""
 	Split the signal into overlapping frames. pads the signal if necessary
+	Here a new frame of size "frame_length" samples starts every "overlap_length" samples
 	:param frame_length: how many samples in each frames
 	:param overlap_length: overlapping samples
 	:return: numpy array of size num_frames, frame_length
@@ -183,7 +187,10 @@ def plot_signal_spectogram(sound_file):
 	plot_signals([signal_xs, signal_xs], [signal_ys, signal_ys_emph], ["origninal signal", "emphasised signal"], "original_+emph_waveform.png")
 
 	frames = split_to_frames(signal_ys_emph, int(FRAME_SIZE * sample_rate), int(FRAME_STRIDE * sample_rate))
+
+	# Windowing: apply apply a filter to force continous signal in each frame by reducing the frame extremes to zero
 	frames *= np.hamming(int(FRAME_SIZE * sample_rate))
+
 	mag_frames = np.absolute(np.fft.rfft(frames, NFFT))  # Magnitude of the FFT
 	pow_frames = ((1.0 / NFFT) * ((mag_frames) ** 2))  # Power Spectrum: Normalizes the magnitudes by the frequency resolution
 
