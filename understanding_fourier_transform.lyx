@@ -1,0 +1,470 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Understanding Fourier decomposition
+\end_layout
+
+\begin_layout Part*
+0.
+ Legend:
+\end_layout
+
+\begin_layout Itemize
+Fundamental frequancy : 
+\begin_inset Formula $\frac{2\pi}{P}$
+\end_inset
+
+ where P is the period of a periodic fucntion
+\end_layout
+
+\begin_layout Itemize
+Harmonic: Any Natural integer multiplication of the Fundemental frequency
+\end_layout
+
+\begin_layout Part*
+1.
+ Trigonometric fourier series
+\end_layout
+
+\begin_layout Standard
+Any real periodic function in [0,P] that admits the dirichlet condition
+\begin_inset Formula $^{1}$
+\end_inset
+
+ can be written as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $f(x)=\stackrel[n=0]{\infty}{\sum}a_{n}cos(n\frac{2\pi}{P}x)+b_{n}sin(n\frac{2\pi}{P}x)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\forall_{n\in N}a_{n}=\frac{2}{P}\stackrel[0]{P}{\varint}f(x)cos(n\frac{2\pi}{P}x)dx$
+\end_inset
+
+ and 
+\begin_inset Formula $\forall_{n\in N}b_{n}=\frac{2}{P}\stackrel[0]{P}{\varint}f(x)sin(n\frac{2\pi}{P}x)dx$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+2.
+ Phase and frequency form
+\end_layout
+
+\begin_layout Standard
+Through trigonometric identities the above can be written as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $f(x)=\stackrel[n=0]{\infty}{\sum}\sqrt{a_{n}^{2}+b_{n}^{2}}cos\left(n\frac{2\pi}{P}x+tan^{-1}(\frac{-b_{n}}{a_{n}})\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $a_{n},b_{n}$
+\end_inset
+
+are defined as above
+\end_layout
+
+\begin_layout Standard
+i.e f can be written as a sum of waves with integer multiplications of the
+ fundematal frequency 
+\begin_inset Formula $\frac{2\pi}{P}.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+They are given specificaly by cosine waves of amplitude 
+\begin_inset Formula $\sqrt{a_{n}^{2}+b_{n}^{2}}$
+\end_inset
+
+ , phase 
+\begin_inset Formula $tan^{-1}(\frac{-b_{n}}{a_{n}})$
+\end_inset
+
+ and frequencie 
+\begin_inset Formula $n\frac{2\pi}{P}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+3.
+ DFT
+\end_layout
+
+\begin_layout Standard
+Discrete periodic signal: A set of points 
+\begin_inset Formula $\{(x_{0}+kF,y_{k})k\in[0,N]\}$
+\end_inset
+
+ is a periodic signal with period P if 
+\begin_inset Formula $\forall_{k}y_{k}=y_{(k+P)_{mod}N}$
+\end_inset
+
+and the sampling rate is F
+\end_layout
+
+\begin_layout Subsection*
+Claim:
+\end_layout
+
+\begin_layout Standard
+Suppoose a discrete periodic signal with period P is given by N points and
+ a sampling rate F.
+ We can write it as a discrete function 
+\begin_inset Formula $g(k)=y_{k}$
+\end_inset
+
+which is defined over [0,N] and have an integer period of P.
+\end_layout
+
+\begin_layout Standard
+DFT (
+\series bold
+discrete 
+\series default
+fourier transform) allows us to find the amplitude and the phase of all
+ the cosine waves of the frequencies 
+\begin_inset Formula $\{\frac{2\pi}{P}k|k\in[0,P-1]\}$
+\end_inset
+
+that compose 
+\begin_inset Formula $g$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and write 
+\begin_inset Formula 
+\begin{align*}
+(1) & g(k)=\stackrel[n=0]{P-1}{\sum}A_{n}cos(n\frac{2\pi}{P}k)+B_{n}sin(n\frac{2\pi}{P}k)\\
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\forall_{n\in[0,P-1]}A_{n}=\frac{2}{P}\stackrel[n=0]{P-1}{\sum}f(x)cos(n\frac{2\pi}{P}k)dx$
+\end_inset
+
+ and 
+\begin_inset Formula $\forall_{n\in[0,P-1]}B_{n}=\frac{2}{P}\stackrel[n=0]{P-1}{\sum}f(x)sin(n\frac{2\pi}{P}k)dx$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In other words, we can compute N amplitudes and pahses of N cosine waves
+ that compose our discrete signal f.
+\end_layout
+
+\begin_layout Standard
+From the above equation we can see that the whole process can be done in
+ time 
+\begin_inset Formula $O(N^{2})$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection*
+Proof:
+\end_layout
+
+\begin_layout Standard
+Recall that P is an integer and Note that for any integer k we have 
+\begin_inset Formula $cos((n+p)\frac{2\pi}{P}k+\theta))=cos((n\frac{2\pi}{P}k+\theta+k2\pi))=cos(n\frac{2\pi}{P}k)$
+\end_inset
+
+.
+ Same goes fir sine.
+\end_layout
+
+\begin_layout Standard
+So as we derived in 
+\series bold
+2
+\series default
+ 
+\begin_inset Formula $f(k)=\stackrel[n=0]{\infty}{\sum}a_{n}cos(n\frac{2\pi}{P}k)+b_{n}sin(n\frac{2\pi}{P}k)=$
+\end_inset
+
+ 
+\begin_inset Formula $\stackrel[n=0]{P-1}{\sum}A_{n}cos(n\frac{2\pi}{P}k)+B_{n}sin(n\frac{2\pi}{P}k)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\forall_{n\in[0,1]}A_{n}=\stackrel[k=1]{\infty}{\sum}a_{n+kP}$
+\end_inset
+
+, 
+\begin_inset Formula $B_{n}=\stackrel[k=1]{\infty}{\sum}b_{n+kP}$
+\end_inset
+
+ which both converge since 
+\begin_inset Formula $\stackrel[n=1]{\infty}{\sum}|a_{n}|,\stackrel[n=1]{\infty}{\sum}|b_{n}|$
+\end_inset
+
+ both converge
+\begin_inset Formula $^{2}$
+\end_inset
+
+ and so any of their subsequences does.
+\end_layout
+
+\begin_layout Standard
+Now we only need to show the clainmed formula for 
+\begin_inset Formula $A_{n},B_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We will show for 
+\begin_inset Formula $A_{n}$
+\end_inset
+
+and the same goes for 
+\begin_inset Formula $B_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can multiply both sides of (1) with 
+\begin_inset Formula $\stackrel[k=0]{P-1}{\sum}cos(m\frac{2\pi}{P}k)$
+\end_inset
+
+ for any positive integer m to get
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{gather*}
+\stackrel[k=0]{P-1}{\sum}g(k)cos(m\frac{2\pi}{P}k)=\stackrel[k=0]{P-1}{\sum}cos(m\frac{2\pi}{P}k)\stackrel[n=0]{P-1}{\sum}\left(A_{n}cos(n\frac{2\pi}{P}k)+B_{n}sin(n\frac{2\pi}{P}k)\right)\\
+=\stackrel[n=0]{P-1}{\sum}\left[A_{n}\stackrel[k=0]{P-1}{\sum}cos(n\frac{2\pi}{P}k)cos(m\frac{2\pi}{P}k)+B_{n}\stackrel[k=0]{P-1}{\sum}cos(n\frac{2\pi}{P}k)sin(m\frac{2\pi}{P}k)\right]\\
+Lemma(3)=\stackrel[n=0]{P-1}{\sum}\left[A_{n}\begin{cases}
+1 & n=m\\
+0 & o.w
+\end{cases}+0\right]\\
+=A_{m}
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+6.
+ Appendix
+\end_layout
+
+\begin_layout Subsubsection*
+proof Lemma(3):
+\end_layout
+
+\begin_layout Standard
+we want to show that 
+\begin_inset Formula $\stackrel[k=0]{P-1}{\sum}cos(n\frac{2\pi}{P}k)cos(m\frac{2\pi}{P}k)=\begin{cases}
+1 & n=m\\
+0 & o.w
+\end{cases}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Indeed by a trigonometric identiy:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{gather*}
+\stackrel[k=0]{P-1}{\sum}cos(n\frac{2\pi}{P}k)cos(m\frac{2\pi}{P}k)=\frac{1}{2}\stackrel[k=0]{P-1}{\sum}cos((n-m)\frac{2\pi}{P}k)+\frac{1}{2}\stackrel[k=0]{P-1}{\sum}cos((n+m)\frac{2\pi}{P}k)\\
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We define 
+\begin_inset Formula $z(n)=\stackrel[k=0]{P-1}{\sum}cos(n\frac{2\pi}{P}k)$
+\end_inset
+
+ .
+ Obviously 
+\begin_inset Formula $z(0)=\stackrel[k=0]{P-1}{\sum}cos(0)=P$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For 
+\begin_inset Formula $n\in\mathbb{N}$
+\end_inset
+
+ we use euler formulat to write 
+\end_layout
+
+\begin_layout Standard
+Si 
+\begin_inset Formula 
+\begin{gather*}
+\\
+z(n)=\frac{1}{2}\left(\stackrel[k=0]{P-1}{\sum}\left(e^{in\frac{2\pi}{P}}\right)^{k}+\stackrel[k=0]{P-1}{\sum}\left(e^{-in\frac{2\pi}{P}}\right)^{k}\right)\\
+=\frac{1}{2}\left(e^{in\frac{2\pi}{P}}\stackrel[k=1]{P}{\sum}\left(e^{in\frac{2\pi}{P}}\right)^{k}+e^{-in\frac{2\pi}{P}}\stackrel[k=1]{P}{\sum}\left(e^{-in\frac{2\pi}{P}}\right)^{k}\right)\\
+(\text{Finite power serie sum})=\frac{1}{2}\left(e^{in\frac{2\pi}{P}}\frac{e^{in\frac{2\pi}{P}P}-1}{e^{in\frac{2\pi}{P}}-1}+e^{-in\frac{2\pi}{P}}\frac{e^{-in\frac{2\pi}{P}P}-1}{e^{-in\frac{2\pi}{P}}-1}\right)\\
+=\frac{1}{2}\left(e^{in\frac{2\pi}{P}}\frac{e^{in2\pi}-1}{e^{in\frac{2\pi}{P}}-1}+e^{-in\frac{2\pi}{P}}\frac{e^{-in2\pi}-1}{e^{-in\frac{2\pi}{P}}-1}\right)
+\end{gather*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+6.
+ Insights
+\end_layout
+
+\begin_layout Itemize
+A periodic function must be composed only of waves that are also have the
+ same period (or a multiplication of it) thats why a periodic function with
+ period P is composed only out of waves with frequencies 
+\begin_inset Formula $n\frac{2\pi}{P},n\in\mathbb{N}$
+\end_inset
+
+ wich all have a period P (the all admit g(x)=g(x+P))
+\end_layout
+
+\begin_layout Part*
+7.
+ Best references
+\end_layout
+
+\begin_layout Itemize
+https://www.youtube.com/playlist?list=PLdciPPorsHukq1koI2EsNpKir3j0lKkCn -
+ Fourier course
+\end_layout
+
+\begin_layout Itemize
+https://lpsa.swarthmore.edu/Fourier/Series/DerFS.html - Fourier derivation
+\end_layout
+
+\begin_layout Itemize
+https://www.youtube.com/watch?v=mkGsMWi_j4Q&ab_channel=SimonXu - Practical
+ DFT
+\end_layout
+
+\end_body
+\end_document
