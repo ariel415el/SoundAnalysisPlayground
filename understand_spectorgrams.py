@@ -2,66 +2,26 @@
 # Code inspired by https://haythamfayek.com/2016/04/21/speech-processing-for-machine-learning.html
 ###################################################################################################
 import numpy as np
-import scipy.io.wavfile
-import matplotlib.pyplot as plt
 from math import ceil
 import os
 
-from sift_utils import split_to_frames, get_mel_filter_bank, pre_emphasize
+import soundfile
 
-COLORS=plt.get_cmap("jet")
+from utils.fft_utils import split_to_frames, pre_emphasize
+from utils.plot_utils import plot_filters, plot_signals, plot_filters_reaction
+from utils.sound_utils import get_mel_filter_bank
 
-FRAME_SIZE = 0.03
-FRAME_STRIDE = 0.015
 
+FRAME_SIZE = 512
+FRAME_STRIDE = 256
 NFFT = 512
 NUM_MEL_FILTES=40
-SINGAL_TIME = None # in seconds None for whole signal
 
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
-def plot_filters(filters, plot_path):
-	fig = plt.figure(figsize=(20,2))
-	for i,filter in enumerate(filters):
-		actual_indices = np.where(filter != 0)[0]
-		actual_indices = np.concatenate(([actual_indices.min() - 1], actual_indices, [actual_indices.max() + 1]))
-		plt.plot(actual_indices, filter[actual_indices], color=COLORS(i /len(filters)))
-	plt.legend(ncol=int(len(filters)/4), loc='lower center', bbox_to_anchor=(1.2,0.5))
-	plt.savefig(os.path.join(OUTPUT_DIR,plot_path))
-	plt.clf()
-
-
-def plot_signals(xs, signals, names, plot_path):
-	fig = plt.figure(figsize=(20,2))
-	for i, (x, signal,name) in enumerate(zip(xs, signals, names)):
-		ax = plt.subplot(len(signals), 1, i+1)
-		ax.plot(x, signal, label=name, color=COLORS(i /len(signals)))
-		ax.legend(ncol=int(len(signals)/4))
-	plt.savefig(os.path.join(OUTPUT_DIR,plot_path))
-	plt.clf()
-
-
-def plot_filters_reaction(filters_output, hz_bin_centers, plot_path):
-	"""
-	:param filters_output: num_frames x num_filters nd_matrix
-	"""
-	fig = plt.figure(figsize=(10,2))
-	filters_output = filters_output.T
-	plt.imshow(filters_output, cmap=plt.cm.jet)
-
-	plt.xlabel("frame number")
-	yticks_indices = np.arange(0, filters_output.shape[0], 5)
-	plt.yticks(yticks_indices, labels=hz_bin_centers[yticks_indices].astype(int))
-	plt.ylabel("Hz")
-	plt.gca().invert_yaxis()
-
-	plt.savefig(os.path.join(OUTPUT_DIR,plot_path))
-	plt.clf()
-
-
-def create_multi_signal(amplitudes, frequencies, phases, time=SINGAL_TIME, sampling_rate=8000, noise_factor=0):
+def create_multi_signal(amplitudes, frequencies, phases, time, sampling_rate=8000, noise_factor=0.0):
 	"""
 	Additive construction of a waveform from specified harmonic signals
 	"""
@@ -82,23 +42,20 @@ def create_multi_signal(amplitudes, frequencies, phases, time=SINGAL_TIME, sampl
 
 
 def load_signal_from_file(sound_file):
-	sample_rate, signal = scipy.io.wavfile.read(sound_file)  # File assumed to be in the same directory
+	signal, sample_rate = soundfile.read(sound_file)  # File assumed to be in the same directory
 	if len(signal.shape) > 1 and signal.shape[1] > 1:
 		print("Using only first signal out of more")
 		signal = signal[:, 0] # use only one signal if there are more than one
-	print("Sginal shape: ",signal.shape)
-	signal_duration = SINGAL_TIME if SINGAL_TIME is not None else len(signal) / sample_rate
-	signal = signal[0:int(signal_duration * sample_rate)]  # Keep the first SINGAL_TIME seconds
-	xs = np.arange(0, signal_duration, 1 / sample_rate)
+	ts = np.arange(0, len(signal) / sample_rate, 1 / sample_rate)
 
-	return xs, signal, sample_rate
+	return ts, signal, sample_rate
 
 
 def analyze_synthetic_signals():
 	"""
 	Adds various harmonic waves into a fabricate a wave form and shows the spectogram that indicates the componnens
 	"""
-	signal_xs, signal_ys, sample_rate, signal_name = create_multi_signal([1, 1, 1], [10, 20, 40], [0, 0, 0],
+	signal_xs, signal_ys, sample_rate, signal_name = create_multi_signal([1, 1, 1], [10, 20, 40], [0, 0, 0], time=5,
 															sampling_rate=100, noise_factor=0.5)
 	# signal_xs, signal_ys, sample_rate = create_multi_signal([1], [7], [0], sampling_rate=100)
 
@@ -134,8 +91,8 @@ def plot_signal_spectogram(sound_file):
 
 	# plot concatenated frames (with repetition)
 	plot_signals([range(len(frames.reshape(-1))), range(len(mag_frames.reshape(-1))), range(len(mag_frames.reshape(-1)))],
-					 [frames.reshape(-1), mag_frames.reshape(-1), pow_frames.reshape(-1)],
-					 ["concatenated frames)", "concatenated mag_frames", "concatenated power_frames"],"org_mag_pos_concatenated_frames.png")
+				 [frames.reshape(-1), mag_frames.reshape(-1), pow_frames.reshape(-1)],
+				 ["concatenated frames)", "concatenated mag_frames", "concatenated power_frames"],"org_mag_pos_concatenated_frames.png")
 
 
 	mel_filter_bank, hz_bin_centers = get_mel_filter_bank(sample_rate, num_filters=NUM_MEL_FILTES, nfft=NFFT)
@@ -150,7 +107,7 @@ def plot_signal_spectogram(sound_file):
 	plot_filters_reaction(filter_outputs, hz_bin_centers, "Spectogram.png")
 
 if __name__ == '__main__':
-	# analyze_synthetic_signals()
+	analyze_synthetic_signals()
 	# plot_signal_spectogram('OSR_us_000_0010_8k.wav')
 	# plot_signal_spectogram('sound_snippets/1A-T001_clap_cropped.WAV')
-	plot_signal_spectogram('sound_snippets/2B-T003_doorslam.WAV')
+	# plot_signal_spectogram('sound_snippets/2B-T003_doorslam.WAV')
