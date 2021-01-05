@@ -6,10 +6,10 @@ import numpy as np
 from sift_utils import pre_emphasize, split_to_frames, get_mel_filter_bank, hz2mel, mel2hz
 
 NFFT = 2**10
-window_size = 2**10
-hop_size = 2**9
+window_size = 2**9
+hop_size = 2**8
 mel_bins = 64
-mel_min_freq = 50       # Hz
+mel_min_freq = 0       # Hz
 mel_max_freq = 14000    # Hz
 
 
@@ -139,11 +139,11 @@ def complex_to_power_spectogram(complex_spectogram):
 
 
 def get_histogram_xticks(sample_rate, num_frames, num_ticks):
-    FPS = sample_rate // hop_size
+    FPS = sample_rate / hop_size
     # Time xticks
     x_tick_hop = num_frames // num_ticks
     xticks = np.arange(0, num_frames, x_tick_hop)
-    xlabels = [f"frame {x}\n{x // FPS:.3f}s" for x in xticks]
+    xlabels = [f"frame {x}\n{x / FPS:.2f}s" for x in xticks]
 
     return xticks, xlabels
 
