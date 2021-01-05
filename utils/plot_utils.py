@@ -19,7 +19,7 @@ def plot_waveforms(samples_list, name_list, sample_rate):
     plt.savefig("Waveforms.png")
 
 
-def plot_spectograms(spectograms, names_list, sample_rate, hop_size, nfft=None, mel_min_freq=None, mel_max_freq=None, type="Power"):
+def plot_spectograms(spectograms, names_list, sample_rate, hop_size, nfft=None, mel_min_freq=None, mel_max_freq=None, type="Power", plot_path=None):
     freq_bins, num_frames = spectograms[0].shape
     xticks, xlabels = get_histogram_xticks(num_frames, sample_rate / hop_size, num_ticks=8)
     if type=='Power':
@@ -56,9 +56,14 @@ def plot_spectograms(spectograms, names_list, sample_rate, hop_size, nfft=None, 
         axs[i].set_yticklabels(ylabels)
         axs[i].set_ylabel(y_title)
 
-    plt.title(f"{type}-Spectogram.png")
+    fig_name = f"{type}-Spectogram"
+    # plt.title(fig_name)
     plt.tight_layout()
-    plt.savefig(f"{type}-Spectogram.png")
+
+    if plot_path is None:
+        plt.savefig(f"{fig_name}.png")
+    else:
+        plt.savefig(plot_path)
 
 
 def get_histogram_xticks(num_frames, fps, num_ticks):
