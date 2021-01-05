@@ -7,25 +7,19 @@ import matplotlib.pyplot as plt
 from math import ceil
 import os
 
+from sift_utils import split_to_frames, get_mel_filter_bank, pre_emphasize
+
 COLORS=plt.get_cmap("jet")
 
 FRAME_SIZE = 0.03
 FRAME_STRIDE = 0.015
-PRE_EMPHASIS = 0.97
+
 NFFT = 512
 NUM_MEL_FILTES=40
-SINGAL_TIME = 3.5 # in seconds None for whole signal
+SINGAL_TIME = None # in seconds None for whole signal
 
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-
-def hz2mel(freq):
-	return (2595 * np.log10(1 + freq / 700))
-
-
-def mel2hz(mel):
-	return (700 * (10 ** (mel / 2595) - 1))
 
 
 def plot_filters(filters, plot_path):
@@ -67,54 +61,6 @@ def plot_filters_reaction(filters_output, hz_bin_centers, plot_path):
 	plt.clf()
 
 
-def split_to_frames(signal, frame_length, overlap_length):
-	"""
-	Split the signal into overlapping frames. pads the signal if necessary
-	Here a new frame of size "frame_length" samples starts every "overlap_length" samples
-	:param frame_length: how many samples in each frames
-	:param overlap_length: overlapping samples
-	:return: numpy array of size num_frames, frame_length
-	"""
-	num_frames = ceil(len(signal) / float(overlap_length))
-	pad_size = (num_frames - 1) * overlap_length + frame_length - len(signal)
-	padded_signal = np.append(signal, np.zeros(pad_size))
-
-	# extract overlapping frames:
-	frame_offsets = np.tile(np.arange(0, num_frames) * overlap_length, (frame_length, 1)).T
-	frame_indices = np.tile(np.arange(0, frame_length), (num_frames, 1))
-	frame_indices += frame_offsets
-
-	return padded_signal[frame_indices]
-
-
-def get_mel_filter_bank(sample_rate, num_filters=40, nfft=512):
-	"""
-	Creates a set of frequency filters in the mel scale
-	:param sample_rate: the sample rate of the data
-	:param nfft:
-	:return: numpy array of shape num_filters x nfft / 22
-	"""
-	low_freq_mel = 0
-	high_freq_mel = hz2mel(sample_rate / 2)  # Convert Hz to Mel
-	mel_bins = np.linspace(low_freq_mel, high_freq_mel, num_filters + 2)  # Equally spaced in Mel scale
-	hz_bins = mel2hz(mel_bins)
-	bin_indices = np.floor((nfft + 1) * hz_bins / sample_rate)
-
-	fbank = np.zeros((num_filters, int(np.floor(nfft / 2 + 1))))
-	for m in range(1, num_filters + 1):
-		f_m_minus = int(bin_indices[m - 1])  # left
-		f_m = int(bin_indices[m])  # center
-		f_m_plus = int(bin_indices[m + 1])  # right
-
-		for k in range(f_m_minus, f_m):
-			fbank[m - 1, k] = (k - bin_indices[m - 1]) / (bin_indices[m] - bin_indices[m - 1])
-		for k in range(f_m, f_m_plus):
-			fbank[m - 1, k] = (bin_indices[m + 1] - k) / (bin_indices[m + 1] - bin_indices[m])
-
-	hz_bin_centers = hz_bins[1:-1]
-	return fbank, hz_bin_centers
-
-
 def create_multi_signal(amplitudes, frequencies, phases, time=SINGAL_TIME, sampling_rate=8000, noise_factor=0):
 	"""
 	Additive construction of a waveform from specified harmonic signals
@@ -141,19 +87,11 @@ def load_signal_from_file(sound_file):
 		print("Using only first signal out of more")
 		signal = signal[:, 0] # use only one signal if there are more than one
 	print("Sginal shape: ",signal.shape)
-	signal_duration = SINGAL_TIME if SINGAL_TIME is not None else len(signal) // sample_rate
+	signal_duration = SINGAL_TIME if SINGAL_TIME is not None else len(signal) / sample_rate
 	signal = signal[0:int(signal_duration * sample_rate)]  # Keep the first SINGAL_TIME seconds
 	xs = np.arange(0, signal_duration, 1 / sample_rate)
 
 	return xs, signal, sample_rate
-
-
-def pre_emphasize(signal):
-	"""
-	Pre ephasize increases the amplitude high frequencies and and decreases it for low frequencies.
-	This adds to the balance of the signal as low frequncies usually have smaller magnitudes.
-	"""
-	return np.append(signal[0], signal[1:] - PRE_EMPHASIS * signal[:-1])
 
 
 def analyze_synthetic_signals():
@@ -214,4 +152,5 @@ def plot_signal_spectogram(sound_file):
 if __name__ == '__main__':
 	# analyze_synthetic_signals()
 	# plot_signal_spectogram('OSR_us_000_0010_8k.wav')
-	plot_signal_spectogram('sound_snippets/OSR_us_000_0010_8k.wav')
+	# plot_signal_spectogram('sound_snippets/1A-T001_clap_cropped.WAV')
+	plot_signal_spectogram('sound_snippets/2B-T003_doorslam.WAV')
