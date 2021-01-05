@@ -32,3 +32,5 @@ It basicaly creates a mel-scale spectogram from a .wav file
 ![alt text](assets/understanding_spectograms/Spectogram.png)
 
 
+# More credits:
+- https://dspillustrations.com/pages/posts/misc/spectral-leakage-zero-padding-and-frequency-resolution.html

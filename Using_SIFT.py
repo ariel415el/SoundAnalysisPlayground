@@ -3,11 +3,11 @@ import soundfile
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sift_utils import pre_emphasize, split_to_frames, get_mel_filter_bank, hz2mel
+from sift_utils import pre_emphasize, split_to_frames, get_mel_filter_bank, hz2mel, mel2hz
 
-NFFT = 2**12
-window_size = 2**8
-hop_size = 125
+NFFT = 2**10
+window_size = 2**10
+hop_size = 2**9
 mel_bins = 64
 mel_min_freq = 50       # Hz
 mel_max_freq = 14000    # Hz
@@ -31,18 +31,22 @@ def plot_spectograms(clap_spectogram, slam_spectogram, sample_rate, type):
     xticks, xlabels = get_histogram_xticks(sample_rate, num_frames, 8)
     yticks, ylabels = get_histogram_yticks(sample_rate, freq_bins, 5)
     if type=='Power':
-        ylabels = np.round(ylabels / 1000, 1)
+        ylabels /= 1000
         y_title = "KHz"
     elif type=='Mel':
-        ylabels = np.round(hz2mel(ylabels),1)
+        yticks, ylabels = get_histogram_yticks(sample_rate, freq_bins, 5, type='mel')
         y_title = "Mel"
     elif type=='Bel':
+        yticks, ylabels = get_histogram_yticks(sample_rate, freq_bins, 5, type='mel')
         yticks = yticks[1:]
         ylabels = ylabels[1:]
-        ylabels = np.round(20 * np.log10(hz2mel(ylabels)),1)
+        ylabels = 20 * np.log10(hz2mel(ylabels))
         y_title = "Db"
     else:
         raise ValueError("No such specogram supported")
+
+    ylabels = np.round(ylabels, 1)
+    ylabels = [f"{l} {y_title}\nbin {i}" for i, l in zip(yticks, ylabels)]
     fig, axs = plt.subplots(2, 1, figsize=(15, 10))
 
     for i, (name, spectogram) in enumerate([("Clap", clap_spectogram), ("Slam", slam_spectogram)]):
@@ -59,6 +63,7 @@ def plot_spectograms(clap_spectogram, slam_spectogram, sample_rate, type):
         axs[i].set_yticklabels(ylabels)
         axs[i].set_ylabel(y_title)
 
+    plt.title(f"{type}-Spectogram.png")
     plt.tight_layout()
     plt.savefig(f"{type}-Spectogram.png")
 
@@ -143,10 +148,14 @@ def get_histogram_xticks(sample_rate, num_frames, num_ticks):
     return xticks, xlabels
 
 
-def get_histogram_yticks(sample_rate, num_freq_bins, num_ticks):
+def get_histogram_yticks(sample_rate, num_freq_bins, num_ticks, type='hz'):
     y_tick_hop = num_freq_bins // num_ticks
     yticks = np.arange(0, num_freq_bins, y_tick_hop)
-    ylabels = yticks * sample_rate/NFFT
+    if type == 'hz':
+        ylabels = yticks * sample_rate/NFFT
+    else:
+        mel_bins = mel2hz(np.linspace(hz2mel(mel_min_freq), hz2mel(mel_max_freq), num_freq_bins + 2)[1:-1])  # Equally spaced in Mel scale
+        ylabels = mel_bins[::y_tick_hop]
 
     return yticks, ylabels
 
@@ -154,7 +163,7 @@ def get_histogram_yticks(sample_rate, num_freq_bins, num_ticks):
 def main():
     use_librosa=True
     pre_emphasize_signal=False
-    in_decibles=True
+
     samples_clap, samples_slam, sample_rate = load_waveforms(pre_emphasize_signal=pre_emphasize_signal)
     plot_waveforms(samples_clap, samples_slam, sample_rate)
 
