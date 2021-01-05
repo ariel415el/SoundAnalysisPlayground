@@ -3,13 +3,13 @@ from matplotlib import pyplot as plt
 
 from utils.sound_utils import hz2mel, mel2hz
 
-COLORS=plt.get_cmap("jet")
+COLORS=['r', 'g', 'b', 'y', 'k']
 
 
-def plot_waveforms(samples_clap, samples_slam, sample_rate):
-    n = samples_clap.shape[0]
-    plt.plot(np.arange(n), samples_slam, color='r', label='samples_slam', alpha=0.5)
-    plt.plot(np.arange(n), samples_clap, color='b', label='samples_clap', alpha=0.5)
+def plot_waveforms(samples_list, name_list, sample_rate):
+    n = samples_list[0].shape[0]
+    for i, (samples, name) in enumerate(zip(samples_list, name_list)):
+        plt.plot(np.arange(n), samples, color=COLORS[i], label=name, alpha=0.5)
     plt.legend()
     xticks = np.arange(0, n + n//10, n//10)
     ts = xticks / sample_rate
@@ -19,8 +19,8 @@ def plot_waveforms(samples_clap, samples_slam, sample_rate):
     plt.savefig("Waveforms.png")
 
 
-def plot_spectograms(clap_spectogram, slam_spectogram, sample_rate, hop_size, nfft=None, mel_min_freq=None, mel_max_freq=None, type="Power"):
-    freq_bins, num_frames = clap_spectogram.shape
+def plot_spectograms(spectograms, names_list, sample_rate, hop_size, nfft=None, mel_min_freq=None, mel_max_freq=None, type="Power"):
+    freq_bins, num_frames = spectograms[0].shape
     xticks, xlabels = get_histogram_xticks(num_frames, sample_rate / hop_size, num_ticks=8)
     if type=='Power':
         yticks, ylabels = get_histogram_yticks(sample_rate, freq_bins, nfft, mel_min_freq, mel_max_freq, num_ticks=5)
@@ -40,9 +40,9 @@ def plot_spectograms(clap_spectogram, slam_spectogram, sample_rate, hop_size, nf
 
     ylabels = np.round(ylabels, 1)
     ylabels = [f"{l} {y_title}\nbin {i}" for i, l in zip(yticks, ylabels)]
-    fig, axs = plt.subplots(2, 1, figsize=(15, 10))
+    fig, axs = plt.subplots(len(spectograms), 1, figsize=(15, 10))
 
-    for i, (name, spectogram) in enumerate([("Clap", clap_spectogram), ("Slam", slam_spectogram)]):
+    for i, (name, spectogram) in enumerate(zip(names_list, spectograms)):
         im = axs[i].matshow(spectogram, origin='lower', aspect='auto', cmap='jet')
         fig.colorbar(im, ax=axs[i])
         axs[i].set_title(f"{name} histogram")
